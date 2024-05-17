@@ -47,7 +47,6 @@ const VideosList = ({ page, search: defaultSearch }: Props) => {
   const router = useRouter();
 
   const totalPages = Math.ceil(count / 8);
-  console.log(totalPages);
 
   return (
     <>

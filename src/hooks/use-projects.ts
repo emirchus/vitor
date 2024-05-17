@@ -34,7 +34,6 @@ export const useProject = (id: number): [boolean, Project?] => {
     if (isNaN(id)) {
       return;
     }
-
     projectsDB.projects.get(id).then(project => {
       setProject(project);
       setLoading(false);

@@ -77,9 +77,20 @@ export function CreateProjectForm() {
             disabled={videos.length === 0 || !title || title?.trim() === "" || !isLoaded}
             onClick={async () => {
               setOpen(false);
+
               const proyect = await createProject({
                 name: title!,
-                videos,
+                videos: videos.map((file, index) => ({
+                  id: index.toString(),
+                  file,
+                  start: 0,
+                  end: 0,
+                  duration: 0,
+                  audio: {
+                    volume: 1,
+                    muted: false
+                  }
+                })),
                 thumbnail: preview
               });
 

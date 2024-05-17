@@ -20,7 +20,7 @@ export const TimelineEditor = () => {
         fontFamily: "var(--font-sans)"
       }}
       ref={timelineRef as never}
-      onChange={setTimelineRow}
+      onChange={setTimelineRow as never}
       editorData={timelineRow}
       effects={{
         video: {
@@ -29,18 +29,18 @@ export const TimelineEditor = () => {
           source: {
             enter(param) {
               if (currentAction?.id !== param.action.id) {
-                setCurrentAction(param.action);
+                setCurrentAction(param.action as never);
               }
             },
             start(param) {
               if (currentAction?.id !== param.action.id) {
-                setCurrentAction(param.action);
+                setCurrentAction(param.action as never);
               }
             },
             update(param) {
               console.log(param.action.start, param.action.end, param.time);
               if (!param.isPlaying && currentAction?.id !== param.action.id)
-                setCurrentAction(param.action);
+                setCurrentAction(param.action as never);
             }
           }
         }

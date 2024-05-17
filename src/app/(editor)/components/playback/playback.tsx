@@ -37,8 +37,10 @@ export const Playback = () => {
       const canvasCtx = canvas.current;
       const ctx = canvasCtx.getContext("2d")!;
       const video = document.createElement("video");
+      console.log(project);
 
-      video.src = URL.createObjectURL(project.videos[+currentAction?.id]);
+      video.src = URL.createObjectURL(currentAction.file);
+
       video.crossOrigin = "anonymous";
       video.load();
 
