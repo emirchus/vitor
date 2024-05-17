@@ -2,32 +2,106 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+    --background: 0 0% 96%;
+    --foreground: 0 0% 20%;
+
+    --muted: 0 12% 95%;
+    --muted-foreground: 0 12% 35%;
+
+    --popover: 0 0% 93%;
+    --popover-foreground: 0 0% 10%;
+
+    --card: 0 0% 94%;
+    --card-foreground: 0 0% 15%;
+
+    --primary: 105 24% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 105 14% 25%;
+    --secondary-foreground: 105 14% 85%;
+
+    --accent: 0 0% 85%;
+    --accent-foreground: 0 0% 25%;
+
+    --destructive: 10 82% 39%;
+    --destructive-foreground: 10 82% 99%;
+
+    --border: 105 14% 85%;
+    --ring: 105 14% 46%;
+    --input: 105 14% 88%;
+
+    --radius: 0.8rem;
+  }
+
+  .dark {
+    --background: 0 0% 10%;
+    --foreground: 0 0% 73%;
+
+    --muted: 0 12% 15%;
+    --muted-foreground: 0 12% 65%;
+
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 83%;
+
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 78%;
+
+    --primary: 105 24% 55%;
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 105 14% 25%;
+    --secondary-foreground: 105 14% 85%;
+
+    --accent: 0 0% 25%;
+    --accent-foreground: 0 0% 85%;
+
+    --destructive: 6 83% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 25%;
+    --input: 0 0% 18%;
+    --ring: 105 24% 55%;
   }
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply min-h-screen bg-background font-sans antialiased;
+  }
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+.timeline-editor-time-unit {
+  border-right: 1px solid hsl(var(--primary) / 0.5) !important;
+}
+
+.timeline-editor-time-unit-scale {
+  color: hsl(var(--primary)) !important;
+}
+
+.timeline-editor-action {
+  background-color: rgb(22 163 74 / 0.2) !important;
+  border-color: rgb(22 163 74) !important;
+  border-width: 1px !important;
+  border-radius: 0.375rem !important;
+}
+
+.timeline-editor-action .timeline-editor-action-right-stretch::after {
+  /* background-color: rgb(22 163 74 / 0.2) !important; */
+  border-right: 7px solid rgb(22 163 74) !important;
+  border-left: 7px solid transparent;
+}
+
+.timeline-editor-action .timeline-editor-action-left-stretch::after {
+  /* background-color: rgb(22 163 74 / 0.2) !important; */
+  border-left: 7px solid rgb(22 163 74) !important;
+  border-right: 7px solid transparent;
+}
+.timeline-editor-edit-row {
+  background-image: linear-gradient(hsl(var(--background)), hsl(var(--background))),
+    linear-gradient(90deg, hsl(var(--border)) 1px, transparent 0) !important;
 }
