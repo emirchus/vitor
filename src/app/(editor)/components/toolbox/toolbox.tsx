@@ -15,20 +15,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { TimelineEditor } from "../timeline";
 import { Loading } from "@/components/loading";
-import { useTimeline } from "@/providers/timeline-provider";
+import { formatTime } from "@/lib/utils";
+import { useWorkspace } from "@/providers/project-provider";
 
 export const Toolbox = () => {
-
-  const { timelineRef, mounted, isPlaying } = useTimeline();
-
-
-
-  const timeRender = (time: number) => {
-    const float = (parseInt((time % 1) * 100 + "") + "").padStart(2, "0");
-    const min = (parseInt(time / 60 + "") + "").padStart(2, "0");
-    const second = (parseInt((time % 60) + "") + "").padStart(2, "0");
-    return <>{`${min}:${second}.${float.replace("0.", "")}`}</>;
-  };
+  const { timelineRef, mounted, isPlaying, timelineRow } = useWorkspace();
 
   return (
     <div className="w-full h-full grid grid-rows-3 grid-cols-1">
@@ -104,9 +95,15 @@ export const Toolbox = () => {
               </Button>
             </div>
             <div className="flex items-center justify-end">
-              <span>{timeRender(timelineRef!.current.getTime())}</span>
+              <span>{formatTime(timelineRef!.current.getTime())}</span>
               <span>/</span>
-              <span>00:12:14</span>
+              <span>
+                {formatTime(
+                  [...timelineRow].sort(
+                    (videoA, videoB) => videoB.actions[0].start - videoA.actions[0].start
+                  )[0].actions[0].end
+                )}
+              </span>
             </div>
           </>
         ) : (

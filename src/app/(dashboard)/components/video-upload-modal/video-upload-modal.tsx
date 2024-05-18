@@ -21,15 +21,21 @@ import Image from "next/image";
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
+let thumbnailCache: Record<string, string> = {};
+
 export const VideoUploadModal = () => {
-  const { addVideo, modal, setModal, removeVideo, videos } = useVideosUploadStore();
-  
+  const { addVideo, modal, setModal, removeVideo, videos, setThumbnails } = useVideosUploadStore();
+
   const router = useRouter();
 
   useEffect(() => {
     if (videos.length === 0) {
       setModal(false);
     }
+
+    return () => {
+      thumbnailCache = {};
+    };
   }, [setModal, videos]);
 
   return (
@@ -106,6 +112,7 @@ export const VideoUploadModal = () => {
             onClick={() => {
               setModal(false);
               //TODO: Create Project structure
+              setThumbnails(thumbnailCache);
               router.push("/editor");
             }}
             disabled={videos.length === 0}
@@ -121,6 +128,13 @@ export const VideoUploadModal = () => {
 const VideoCard = ({ video, index }: { video: File; index: number }) => {
   const [isLoaded, imageUrl] = usePreview(video);
   const removeVideo = useVideosUploadStore(state => state.removeVideo);
+
+  useEffect(() => {
+    if (!thumbnailCache[video.name] && isLoaded && imageUrl) {
+      thumbnailCache[video.name] = imageUrl;
+    }
+  }, [imageUrl, isLoaded, video.name]);
+
   return (
     <Card className="relative">
       <Button

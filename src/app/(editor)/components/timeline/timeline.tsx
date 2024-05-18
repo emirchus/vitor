@@ -1,15 +1,17 @@
 "use client";
-import { useTimeline } from "@/providers/timeline-provider";
+import { useWorkspace } from "@/providers/project-provider";
 import { Timeline } from "@xzdarcy/react-timeline-editor";
-import React, { useEffect } from "react";
+import React from "react";
 
 export const TimelineEditor = () => {
-  const { timelineRef, setMounted, currentAction, setCurrentAction, timelineRow, setTimelineRow } =
-    useTimeline();
-
-  useEffect(() => {
-    if (timelineRef) setMounted(true);
-  }, [setMounted, timelineRef]);
+  const {
+    timelineRef,
+    currentAction,
+    setCurrentAction,
+    timelineRow,
+    setTimelineRow,
+    saveAction
+  } = useWorkspace();
 
   return (
     <Timeline
@@ -41,12 +43,23 @@ export const TimelineEditor = () => {
               console.log(param.action.start, param.action.end, param.time);
               if (!param.isPlaying && currentAction?.id !== param.action.id)
                 setCurrentAction(param.action as never);
+            },
+            leave(param) {
+              if (currentAction?.id === param.action.id) setCurrentAction();
             }
           }
         }
       }}
-      autoScroll
-      autoReRender
+      onContextMenuAction={(e, { action, row, time }) => {
+        console.log(action, row, time);
+        e.preventDefault();
+      }}
+      onActionMoveEnd={action => {
+        saveAction(action.action as never);
+      }}
+      onActionResizeEnd={action => {
+        saveAction(action.action as never);
+      }}
       gridSnap
       dragLine
     />

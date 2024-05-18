@@ -1,15 +1,12 @@
 "use client";
 import React from "react";
 import { GridPattern } from "../grid-pattern";
-import { useProject } from "@/hooks/use-projects";
-import { useParams } from "next/navigation";
-import { useTimeline } from "@/providers/timeline-provider";
-
+import { useWorkspace } from "@/providers/project-provider";
 export const Playback = () => {
   const canvas = React.useRef<HTMLCanvasElement>(null);
-  const { id } = useParams<{ id: string }>();
-  const [isLoading, project] = useProject(+id);
-  const { timelineRef, mounted, currentAction } = useTimeline();
+
+  //TODO!: remove and use timeine instead
+  const { timelineRef, mounted, currentAction, project } = useWorkspace();
 
   const renderRoundedRect = (
     ctx: CanvasRenderingContext2D,
@@ -33,7 +30,9 @@ export const Playback = () => {
   };
 
   React.useEffect(() => {
-    if (mounted && !isLoading && canvas.current && project && currentAction) {
+    console.log(project);
+
+    if (mounted && canvas.current && project && currentAction) {
       const canvasCtx = canvas.current;
       const ctx = canvasCtx.getContext("2d")!;
       const video = document.createElement("video");
@@ -92,7 +91,7 @@ export const Playback = () => {
         video.src = "";
       };
     }
-  }, [currentAction, project, timelineRef, isLoading, mounted]);
+  }, [currentAction, mounted, project, timelineRef]);
 
   return (
     <div className="w-full h-full relative">

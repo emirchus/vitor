@@ -23,7 +23,7 @@ export function CreateProjectForm() {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [title, setTitle] = React.useState<string>("");
-  const { videos, setVideos } = useVideosUploadStore();
+  const { videos, setVideos, setThumbnails, thumbnails } = useVideosUploadStore();
 
   const [isLoaded, preview] = usePreview(videos[0]);
 
@@ -37,7 +37,11 @@ export function CreateProjectForm() {
     setTimeout(() => {
       setOpen(true);
     }, 1000);
-  }, [router, videos.length]);
+
+    return () => {
+      setThumbnails({});
+    };
+  }, [router, setThumbnails, videos.length]);
 
   return (
     <Dialog
@@ -86,6 +90,7 @@ export function CreateProjectForm() {
                   start: 0,
                   end: 0,
                   duration: 0,
+                  thumbnail: thumbnails[file.name],
                   audio: {
                     volume: 1,
                     muted: false

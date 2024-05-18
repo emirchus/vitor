@@ -106,7 +106,3 @@
     linear-gradient(90deg, hsl(var(--border)) 1px, transparent 0) !important;
 }
 
-.timeline-editor-action-left-stretch{
-  /* display: none; */
-  pointer-events: none;
-}

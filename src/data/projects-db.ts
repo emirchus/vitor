@@ -3,6 +3,7 @@ import Dexie, { Table } from "dexie";
 export interface Video {
   id: string;
   file: File;
+  thumbnail: string;
   start: number;
   end: number;
   duration: number;

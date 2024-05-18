@@ -1,5 +1,5 @@
 import type { Config } from "tailwindcss";
-import { fontFamily } from 'tailwindcss/defaultTheme';
+import { fontFamily } from "tailwindcss/defaultTheme";
 
 const config = {
   darkMode: ["class"],
@@ -63,6 +63,10 @@ const config = {
         sm: "calc(var(--radius) - 4px)"
       },
       keyframes: {
+        rotation: {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" }
+        },
         "accordion-down": {
           from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" }
@@ -74,7 +78,8 @@ const config = {
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out"
+        "accordion-up": "accordion-up 0.2s ease-out",
+        rotation: "rotation 10s linear infinite"
       }
     }
   },

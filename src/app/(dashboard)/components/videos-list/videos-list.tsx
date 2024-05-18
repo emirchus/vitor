@@ -1,7 +1,7 @@
 "use client";
 
 import { useDeleteProject, useProjects, useProjectsCount } from "@/hooks/use-projects";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Project } from "@/data/projects-db";
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
@@ -137,6 +137,21 @@ const ProjectCard = ({ project, index }: { project: Project; index: number }) =>
 
   const [isDeleting, setIsDeleting] = React.useState(false);
 
+  const [currentImage, setCurrentImage] = useState(0);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      if (currentImage === project.videos.length - 1) {
+        setCurrentImage(0);
+        return;
+      }
+      setCurrentImage(currentImage + 1);
+
+    }, 1000 * 5);
+
+    return () => clearInterval(intervalId);
+  }, [currentImage, project.videos.length]);
+
   return (
     <MotionCard
       animate={{
@@ -153,10 +168,31 @@ const ProjectCard = ({ project, index }: { project: Project; index: number }) =>
         damping: 30,
         delay: 0.1 * index
       }}
+      className="relative overflow-hidden"
     >
-      <CardHeader className="grid grid-cols-1 items-start mb-0 pb-0 space-y-0">
+      <div className="absolute left-0 top-1/2 z-0 transform-gpu blur-2xl" aria-hidden="true">
+        <div
+          className="aspect-[577/310] w-[36.0625rem] bg-gradient-to-r from-[#ff80b5] to-[#9089fc] opacity-20 dark:opacity-10"
+          style={{
+            clipPath:
+              "polygon(74.8% 41.9%, 97.2% 73.2%, 100% 34.9%, 92.5% 0.4%, 87.5% 0%, 75% 28.6%, 58.5% 54.6%, 50.1% 56.8%, 46.9% 44%, 48.3% 17.4%, 24.7% 53.9%, 0% 27.9%, 11.9% 74.2%, 24.9% 54.1%, 68.6% 100%, 74.8% 41.9%)"
+          }}
+        ></div>
+      </div>
+
+      <div className="absolute left-0 -top-[50%] z-0  transform-gpu blur-2xl" aria-hidden="true">
+        <div
+          className="aspect-[577/310] w-[36.0625rem] bg-gradient-to-r from-[#ff80b5] to-[#9089fc] opacity-20 dark:opacity-10"
+          style={{
+            clipPath:
+              "polygon(74.8% 41.9%, 97.2% 73.2%, 100% 34.9%, 92.5% 0.4%, 87.5% 0%, 75% 28.6%, 58.5% 54.6%, 50.1% 56.8%, 46.9% 44%, 48.3% 17.4%, 24.7% 53.9%, 0% 27.9%, 11.9% 74.2%, 24.9% 54.1%, 68.6% 100%, 74.8% 41.9%)"
+          }}
+        ></div>
+      </div>
+
+      <CardHeader className="grid grid-cols-1 items-start mb-0 pb-0 space-y-0 relative z-10">
         <div className="space-y-2">
-          <AspectRatio ratio={16 / 9} className="rounded overflow-hidden">
+          <AspectRatio ratio={16 / 9} className="rounded overflow-hidden shadow-md">
             <AnimatePresence>
               {project.thumbnail ? (
                 <MotionImage
@@ -166,7 +202,7 @@ const ProjectCard = ({ project, index }: { project: Project; index: number }) =>
                   initial={{
                     opacity: 0
                   }}
-                  src={project.thumbnail}
+                  src={project.videos[currentImage].thumbnail}
                   alt="Project thumbnail"
                   width={1280}
                   height={720}
@@ -240,7 +276,7 @@ const ProjectCard = ({ project, index }: { project: Project; index: number }) =>
         </div>
       </CardHeader>
       <Separator className="my-2" />
-      <CardContent>
+      <CardContent className="relative z-10">
         <div className="flex space-x-4 text-sm text-muted-foreground">
           <Tooltip>
             <TooltipTrigger asChild>
@@ -256,11 +292,27 @@ const ProjectCard = ({ project, index }: { project: Project; index: number }) =>
               </div>
             </TooltipContent>
           </Tooltip>
+
+          {project.updatedAt && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center">
+                  <CalendarIcon className="mr-1 h-3 w-3" />
+                  {project.updatedAt.toLocaleDateString()}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <div>
+                  Updated at: {project.updatedAt.toLocaleDateString()} -{" "}
+                  {project.updatedAt.toLocaleTimeString()}
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          )}
           <div className="flex items-center">
             <FilmIcon className="mr-1 h-3 w-3" />
             {project.videos.length}
           </div>
-          {project.updatedAt && <div>Updated: {project.updatedAt.toLocaleDateString()}</div>}
         </div>
       </CardContent>
     </MotionCard>
