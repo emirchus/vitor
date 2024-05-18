@@ -1,5 +1,5 @@
 "use client";
-import { useWorkspace } from "@/providers/project-provider";
+import { useWorkspace } from "@/providers/workspace-provider";
 import { Timeline } from "@xzdarcy/react-timeline-editor";
 import React from "react";
 
@@ -60,6 +60,7 @@ export const TimelineEditor = () => {
       onActionResizeEnd={action => {
         saveAction(action.action as never);
       }}
+      autoScroll
       gridSnap
       dragLine
     />

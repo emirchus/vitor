@@ -1,6 +1,14 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from "react";
 import { TimelineAction, TimelineRow, TimelineState } from "@xzdarcy/react-timeline-editor";
 import { useParams } from "next/navigation";
 import { useProject, useUpdateProject } from "@/hooks/use-projects";
@@ -10,7 +18,7 @@ import { Project, Video, projectsDB } from "@/data/projects-db";
 export type EditorTimelineAction = TimelineAction & { file: File };
 export type EditorTimelineRow = TimelineRow & { actions: EditorTimelineAction[] };
 
-interface ProjectProviderState {
+interface WorkspaceState {
   timelineRef: React.MutableRefObject<TimelineState>;
   mounted: boolean;
   setMounted: (value: boolean) => void;
@@ -26,12 +34,14 @@ interface ProjectProviderState {
 
   saveProject: (force?: boolean) => void;
   saveAction: (action: EditorTimelineAction) => void;
+
+  videoDuration: number;
 }
 
-const ProjectContext = createContext<ProjectProviderState>({} as ProjectProviderState);
+const WorkspaceContext = createContext<WorkspaceState>({} as WorkspaceState);
 
 export const useWorkspace = () => {
-  const context = useContext(ProjectContext);
+  const context = useContext(WorkspaceContext);
   if (!context) {
     throw new Error("useWorkspace must be used within a WorkspaceProvider");
   }
@@ -200,8 +210,18 @@ export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) =
     };
   }, [commitProject, id, project, saveProject, update]);
 
+  const videoDuration = useMemo(
+    () =>
+      timelineRow.length > 0
+        ? [...timelineRow].sort(
+            (videoA, videoB) => videoB.actions[0].start - videoA.actions[0].start
+          )[0].actions[0].end
+        : 0,
+    [timelineRow]
+  );
+
   return (
-    <ProjectContext.Provider
+    <WorkspaceContext.Provider
       value={{
         timelineRef: timelineState as never,
         mounted,
@@ -214,10 +234,11 @@ export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) =
         setCurrentAction: setCurrentTimelineAction,
         saveProject,
         saveAction,
-        project
+        project,
+        videoDuration
       }}
     >
       {children}
-    </ProjectContext.Provider>
+    </WorkspaceContext.Provider>
   );
 };

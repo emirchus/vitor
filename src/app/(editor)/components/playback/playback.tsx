@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { GridPattern } from "../grid-pattern";
-import { useWorkspace } from "@/providers/project-provider";
+import { useWorkspace } from "@/providers/workspace-provider";
 export const Playback = () => {
   const canvas = React.useRef<HTMLCanvasElement>(null);
 

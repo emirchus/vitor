@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/menubar";
 import { useFfmpeg } from "@/hooks/use-ffmpeg";
 import { formatTime } from "@/lib/utils";
-import { useWorkspace } from "@/providers/project-provider";
+import { useWorkspace } from "@/providers/workspace-provider";
 import { useEditorStore } from "@/store/editor.store";
 import { fetchFile } from "@ffmpeg/util";
 import { ArrowLeftIcon, Share2Icon } from "@radix-ui/react-icons";
@@ -100,8 +100,8 @@ const Header = () => {
 
   return (
     <>
-      <header className="w-screen h-12 bg-background border-b border-border grid grid-cols-3 grid-rows-1 p-5">
-        <div className="col-span-1 flex flex-row items-center justify-start space-x-2">
+      <header className="w-screen h-12 bg-background border-b border-border grid grid-cols-3 grid-rows-1 px-5 gap-2">
+        <div className="col-span-1 flex flex-row items-center justify-start space-x-2 overflow-clip">
           <Button
             variant="outline"
             size={"icon"}
@@ -169,10 +169,10 @@ const Header = () => {
             </MenubarMenu>
           </Menubar>
         </div>
-        <div className="col-span-1 flex flex-row items-center justify-center w-full">
-          {project && <h3>{project.name}</h3>}
+        <div className="col-span-1 flex flex-row items-center justify-center w-full text-center max-w-md overflow-clip">
+          {project && <h3 className="text-ellipsis text-nowrap ">{project.name}</h3>}
         </div>
-        <div className=" col-span-1 flex flex-row items-center justify-end">
+        <div className=" col-span-1 flex flex-row items-center justify-end overflow-hidden">
           <ModeToggle />
           <Button variant="outline" className="ml-2" onClick={exportVideo} disabled={!project}>
             Export <Share2Icon className="w-4 h-4 ml-2" />

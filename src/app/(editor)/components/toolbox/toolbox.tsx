@@ -16,10 +16,10 @@ import { Button } from "@/components/ui/button";
 import { TimelineEditor } from "../timeline";
 import { Loading } from "@/components/loading";
 import { formatTime } from "@/lib/utils";
-import { useWorkspace } from "@/providers/project-provider";
+import { useWorkspace } from "@/providers/workspace-provider";
 
 export const Toolbox = () => {
-  const { timelineRef, mounted, isPlaying, timelineRow } = useWorkspace();
+  const { timelineRef, mounted, isPlaying, videoDuration } = useWorkspace();
 
   return (
     <div className="w-full h-full grid grid-rows-3 grid-cols-1">
@@ -97,13 +97,7 @@ export const Toolbox = () => {
             <div className="flex items-center justify-end">
               <span>{formatTime(timelineRef!.current.getTime())}</span>
               <span>/</span>
-              <span>
-                {formatTime(
-                  [...timelineRow].sort(
-                    (videoA, videoB) => videoB.actions[0].start - videoA.actions[0].start
-                  )[0].actions[0].end
-                )}
-              </span>
+              <span>{formatTime(videoDuration)}</span>
             </div>
           </>
         ) : (
