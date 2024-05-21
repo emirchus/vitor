@@ -5,57 +5,76 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useRouter } from "next/navigation";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useCreateProject } from "@/hooks/use-projects";
-import { useVideosUploadStore } from "@/store/videos-upload.store";
-import { usePreview } from "@/hooks/use-image-preview";
-import { getVideoDuration } from "@/lib/video-utils";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AspectRatio, Framerate, Resolution } from "@/interfaces/project";
+import { useWorkspace } from "@/providers/workspace-provider";
+import { Loading } from "@/components/loading";
 
-export function CreateProjectForm() {
+export function EditProjectForm() {
   const router = useRouter();
-  const [open, setOpen] = React.useState(false);
-  const [title, setTitle] = React.useState<string>("");
-  const { videos, setVideos } = useVideosUploadStore();
-  const [resolution, setResolution] = React.useState<Resolution>(720);
-  const [framerate, setFramerate] = React.useState<Framerate>(60);
-  const [aspectRatio, setAspectRatio] = React.useState<AspectRatio>("16:9");
+  const pathname = usePathname();
+  const params = useSearchParams();
+  const { project, saveProject, mounted } = useWorkspace();
+  const [title, setTitle] = React.useState<string | undefined>(project?.name);
+  const [resolution, setResolution] = React.useState<Resolution | undefined>(project?.resolution);
+  const [framerate, setFramerate] = React.useState<Framerate | undefined>(project?.framerate);
+  const [aspectRatio, setAspectRatio] = React.useState<AspectRatio | undefined>(project?.aspectRatio);
 
-  const [isLoaded, preview] = usePreview(videos[0]);
+  const [hasChanged, setHasChanged] = React.useState(false);
 
-  const createProject = useCreateProject();
+  const [isLoading, setIsLoading] = React.useState(false);
 
   React.useEffect(() => {
-    if (videos.length === 0) {
-      router.replace("/");
-      return;
+    if (!project) return;
+
+    if (
+      (project!.name !== title && title?.trim().length !== 0) ||
+      project!.resolution !== resolution ||
+      project!.framerate !== framerate ||
+      project!.aspectRatio !== aspectRatio
+    ) {
+      setHasChanged(true);
+    } else {
+      setHasChanged(false);
     }
-    setTimeout(() => {
-      setOpen(true);
-    }, 1000);
-  }, [router, videos.length]);
+  }, [aspectRatio, framerate, project, resolution, title]);
+
+  React.useEffect(() => {
+    if (project) {
+      setTitle(project.name);
+      setResolution(project.resolution);
+      setFramerate(project.framerate);
+      setAspectRatio(project.aspectRatio);
+    }
+  }, [project]);
+
+  if (!mounted) return null;
 
   return (
     <Dialog
-      open={open}
+      modal
+      open={params.get("edit") !== null}
       onOpenChange={open => {
-        if (!open) {
-          router.replace("/");
-          setVideos([]);
+        if (!open && !isLoading) {
+          if (project) {
+            setTitle(project.name);
+            setResolution(project.resolution);
+            setFramerate(project.framerate);
+            setAspectRatio(project.aspectRatio);
+          }
+          router.replace(pathname);
         }
       }}
-      defaultOpen
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create project</DialogTitle>
-          <DialogDescription>Create your new project in one-click.</DialogDescription>
+          <DialogTitle>Edit project</DialogTitle>
         </DialogHeader>
         <div className="grid w-full items-center gap-4">
           <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="name">Title</Label>
+            <Label htmlFor="title">Title</Label>
             <Input
               name="title"
               value={title}
@@ -70,7 +89,7 @@ export function CreateProjectForm() {
             <div className="flex flex-col space-y-1.5 w-full">
               <Label htmlFor="resolution">Resolution</Label>
               <Select
-                defaultValue={resolution.toString()}
+                defaultValue={resolution?.toString()}
                 onValueChange={value => {
                   setResolution(parseInt(value) as Resolution);
                 }}
@@ -94,7 +113,7 @@ export function CreateProjectForm() {
             <div className="flex flex-col space-y-1.5 w-full">
               <Label htmlFor="framerate">Framerate</Label>
               <Select
-                defaultValue={framerate.toString()}
+                defaultValue={framerate?.toString()}
                 onValueChange={value => {
                   setFramerate(parseInt(value) as Framerate);
                 }}
@@ -141,56 +160,26 @@ export function CreateProjectForm() {
         </div>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button disabled={isLoading} variant="outline">
+              Cancel
+            </Button>
           </DialogClose>
           <Button
-            disabled={videos.length === 0 || !title || title?.trim() === "" || !isLoaded}
+            disabled={!hasChanged || isLoading}
             onClick={async () => {
-              setOpen(false);
-              let videosDuration = await Promise.all(
-                videos.map(async (file, index) => {
-                  const { duration, thumbnail } = await getVideoDuration(file);
-
-                  return {
-                    id: index.toString(),
-                    file,
-                    start: 0,
-                    end: duration,
-                    duration: duration,
-                    thumbnail: thumbnail,
-                    audio: {
-                      volume: 1,
-                      muted: false
-                    }
-                  };
-                })
-              );
-
-              //Sort videos from the longest to the shortest
-              videosDuration = videosDuration.sort((a, b) => b.duration - a.duration);
-
-              //Format videos by appending the start and end time from the previous video
-              videosDuration = videosDuration.map((video, index) => ({
-                ...video,
-                start: index === 0 ? 0 : videosDuration[index - 1].end,
-                end: (index === 0 ? 0 : videosDuration[index - 1].end) + video.end
-              }));
-
-              const proyect = await createProject({
-                name: title!,
-                videos: videosDuration,
-                thumbnail: preview,
-                aspectRatio,
-                framerate,
-                resolution
+              setIsLoading(true);
+              await saveProject(true, {
+                ...project!,
+                name: title || project!.name,
+                resolution: resolution || project!.resolution,
+                framerate: framerate || project!.framerate,
+                aspectRatio: aspectRatio || project!.aspectRatio
               });
-
-              setTimeout(() => {
-                router.replace("/editor/" + proyect);
-              }, 1000);
+              setIsLoading(false);
+              router.replace(pathname);
             }}
           >
-            Create
+            {isLoading ? <Loading /> : "Save"}
           </Button>
         </DialogFooter>
       </DialogContent>

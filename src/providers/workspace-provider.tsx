@@ -1,39 +1,22 @@
 "use client";
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from "react";
-import { TimelineAction, TimelineRow, TimelineState } from "@xzdarcy/react-timeline-editor";
-import { useParams } from "next/navigation";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { useProject, useUpdateProject } from "@/hooks/use-projects";
-import { getVideoDuration } from "@/lib/video-utils";
-import { Project, Video, projectsDB } from "@/data/projects-db";
+import { projectsDB } from "@/data/projects-db";
+import { Project } from "@/interfaces/project";
+import { Logger } from "@/lib/logger";
+import { useTimeline } from "./timeline-provider";
 
-export type EditorTimelineAction = TimelineAction & { file: File };
-export type EditorTimelineRow = TimelineRow & { actions: EditorTimelineAction[] };
+const logger = Logger.create("[Workspace Provider]", ["green"], () => {});
 
 interface WorkspaceState {
-  timelineRef: React.MutableRefObject<TimelineState>;
   mounted: boolean;
   setMounted: (value: boolean) => void;
-  isPlaying: boolean;
-  time: number;
-  currentAction?: EditorTimelineAction;
-  setCurrentAction: (value?: EditorTimelineAction) => void;
 
   project?: Project;
 
-  timelineRow: EditorTimelineRow[];
-  setTimelineRow: (value: EditorTimelineRow[]) => void;
-
-  saveProject: (force?: boolean) => void;
-  saveAction: (action: EditorTimelineAction) => void;
+  saveProject: (saveForce?: boolean, project?: Project) => Promise<void>;
 
   videoDuration: number;
 }
@@ -49,78 +32,56 @@ export const useWorkspace = () => {
 };
 
 export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) => {
-  const timelineState = useRef<TimelineState>();
   const [mounted, setMounted] = useState(false);
-  const [currentTimelineAction, setCurrentTimelineAction] = useState<
-    EditorTimelineAction | undefined
-  >();
+  const { updateData } = useTimeline();
 
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  const [time, setTime] = useState(0);
-
-  const [timelineRow, setTimelineRow] = useState<EditorTimelineRow[]>([]);
-
+  const router = useRouter();
   const { id } = useParams<{ id: string }>();
-  const [isLoading, _project] = useProject(+id);
+  const [loading, _project] = useProject(+id);
   const update = useUpdateProject();
 
   const [project, setProject] = useState<Project | undefined>(_project);
 
-  const loadProject = useCallback(async (project: Project) => {
-    if (!project) return;
-    const videos_maps = await Promise.all(
-      project.videos.map(async (video, index) => {
-        const duration = await getVideoDuration(video.file);
+  const loadProject = useCallback(
+    async (project: Project) => {
+      if (!project) return;
 
-        const row: EditorTimelineRow = {
-          id: index.toString(),
-          actions: [
-            {
-              effectId: "video",
-              file: video.file,
-              id: video.id,
-              start: video.start,
-              end: video.end || duration
-            }
-          ]
-        };
-        return row;
-      })
-    );
-    setProject(project);
+      //TODO: Transcode timeline
+      updateData(
+        project.videos.map(video => ({
+          id: video.id,
+          action: {
+            ...video,
+            rowId: video.id
+          }
+        }))
+      );
 
-    setTimelineRow(videos_maps);
-  }, []);
+      setProject(project);
+    },
+    [updateData]
+  );
 
   useEffect(() => {
-    if (!timelineState.current || (isLoading && !_project)) return;
+    logger.log("Initializing workspace...");
 
-    // setProject(_project);
+    if (!loading && !_project) {
+      router.replace("/");
+      return;
+    }
 
-    const engine = timelineState.current!;
-
-    loadProject(_project!).then(() => {
-      console.log("mounted");
-
+    if (!_project) return;
+    setMounted(false);
+    (async () => {
+      await loadProject(_project!);
       setMounted(true);
-      engine.listener.on("play", () => setIsPlaying(true));
-      engine.listener.on("paused", () => setIsPlaying(false));
-      engine.listener.on("afterSetTime", ({ time }) => setTime(time));
-      engine.listener.on("setTimeByTick", ({ time }) => {
-        setTime(time);
-
-        // timelineState!.current!.setScrollLeft(left);
-      });
-    });
+    })();
 
     return () => {
-      if (!engine) return;
-      engine.pause();
-      engine.listener.offAll();
+      logger.log("Workspace destroyed...");
       setMounted(false);
     };
-  }, [_project, isLoading, loadProject]);
+  }, [_project, loadProject, loading, router]);
 
   const commitProject = useCallback(
     (newProject?: Project) => {
@@ -130,67 +91,16 @@ export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) =
   );
 
   const saveProject = useCallback(
-    async (saveForce: boolean = false) => {
+    async (saveForce: boolean = false, newProject?: Project) => {
       if (!project) return;
-      console.log("Saving project...");
-
-      const finalVideos = timelineRow
-        .map(row => row.actions[0] as EditorTimelineAction)
-        .map<Video>(video => {
-          const oldVideo = project.videos.find(v => v.id === video.id);
-          return {
-            ...oldVideo!,
-            start: video.start,
-            end: video.end,
-            duration: video.end
-          };
-        });
-
-      setProject({
-        ...project!,
-        updatedAt: new Date(),
-        videos: finalVideos
-      });
+      if (newProject) setProject(newProject);
+      logger.log("Saving project...");
 
       if (saveForce) {
         commitProject();
       }
 
-      console.log("Project saved...");
-    },
-    [commitProject, project, timelineRow]
-  );
-
-  const saveAction = useCallback(
-    async (action: EditorTimelineAction) => {
-      if (!project) return;
-
-      console.log("Saving action...");
-
-      const originalVideo = project.videos.find(video => video.id === action.id);
-
-      if (!originalVideo) return;
-
-      const finalVideos = project.videos.map(video => {
-        if (video.id === action.id) {
-          return {
-            ...video,
-            start: action.start,
-            end: action.end
-          };
-        }
-
-        return video;
-      });
-
-      const newProject = {
-        ...project!,
-        updatedAt: new Date(),
-        videos: finalVideos
-      };
-      setProject(newProject);
-      commitProject(newProject);
-      console.log("Action saved...");
+      logger.log("Project saved...");
     },
     [commitProject, project]
   );
@@ -210,30 +120,14 @@ export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) =
     };
   }, [commitProject, id, project, saveProject, update]);
 
-  const videoDuration = useMemo(
-    () =>
-      timelineRow.length > 0
-        ? [...timelineRow].sort(
-            (videoA, videoB) => videoB.actions[0].start - videoA.actions[0].start
-          )[0].actions[0].end
-        : 0,
-    [timelineRow]
-  );
+  const videoDuration = useMemo(() => project?.videos.map(video => video.end).sort((a, b) => b - a)[0] || 0, [project?.videos]);
 
   return (
     <WorkspaceContext.Provider
       value={{
-        timelineRef: timelineState as never,
         mounted,
         setMounted,
-        isPlaying,
-        time,
-        timelineRow,
-        setTimelineRow,
-        currentAction: currentTimelineAction,
-        setCurrentAction: setCurrentTimelineAction,
         saveProject,
-        saveAction,
         project,
         videoDuration
       }}

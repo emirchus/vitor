@@ -7,22 +7,12 @@ import { Toolbox } from "@/app/(editor)/components/toolbox";
 import { ImperativePanelHandle } from "react-resizable-panels";
 import { useEffect, useRef } from "react";
 import { useEditorStore } from "@/store/editor.store";
-import {
-  Dialog,
-  DialogTitle,
-  DialogDescription,
-  DialogHeader,
-  DialogContent
-} from "@/components/ui/dialog";
-import { Progress } from "@/components/ui/progress";
-import { Loading } from "@/components/loading";
-import { AnimatePresence, motion } from "framer-motion";
+import { EditProjectForm } from "@/app/(editor)/components/edit-project";
 
 export default function EditorPage() {
   const panelLeftRef = useRef<ImperativePanelHandle>(null);
   const panelBottomRef = useRef<ImperativePanelHandle>(null);
-  const { panelLeft, setPanelLeft, timeline, setTimeline, isExporting, exportProcess } =
-    useEditorStore();
+  const { panelLeft, setPanelLeft, timeline, setTimeline } = useEditorStore();
 
   useEffect(() => {
     if (panelLeft) {
@@ -40,41 +30,7 @@ export default function EditorPage() {
 
   return (
     <>
-      <Dialog open={isExporting} defaultOpen={false}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Exporting Video</DialogTitle>
-            <DialogDescription>Exporting video to MP4 format</DialogDescription>
-          </DialogHeader>
-          <AnimatePresence>
-            {exportProcess < 100 ? (
-              <Progress value={exportProcess} />
-            ) : (
-              <motion.div
-                initial={{
-                  y: 20,
-                  opacity: 0
-                }}
-                animate={{
-                  y: 0,
-                  opacity: 1
-                }}
-                exit={{
-                  y: 20,
-                  opacity: 0
-                }}
-                transition={{
-                  duration: 0.3
-                }}
-                className="w-full flex items-center justify-center space-y-2 flex-col"
-              >
-                <Loading />
-                <p>We are writing your file...</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </DialogContent>
-      </Dialog>
+      <EditProjectForm />
       <ResizablePanelGroup direction="vertical" className="w-full h-full">
         <ResizablePanel defaultSize={70} collapsible={false}>
           <ResizablePanelGroup direction="horizontal" className="w-full h-full">
@@ -82,7 +38,7 @@ export default function EditorPage() {
               defaultSize={20}
               maxSize={40}
               collapsedSize={0}
-              minSize={10}
+              minSize={15}
               collapsible
               className="bg-background"
               onCollapse={() => setPanelLeft(true)}
@@ -101,7 +57,7 @@ export default function EditorPage() {
         <ResizablePanel
           ref={panelBottomRef}
           collapsedSize={0}
-          minSize={1}
+          minSize={5}
           defaultSize={30}
           maxSize={70}
           collapsible

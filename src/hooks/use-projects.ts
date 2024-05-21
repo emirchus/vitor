@@ -1,6 +1,7 @@
-import { Project, projectsDB } from "@/data/projects-db";
 import { useEffect, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
+import { projectsDB } from "@/data/projects-db";
+import { Project } from "@/interfaces/project";
 
 export const useProjects = (search: string = "", page: number = 1) => {
   const limit = 8;
@@ -17,14 +18,7 @@ export const useProjects = (search: string = "", page: number = 1) => {
 };
 
 export const useProjectsCount = (search: string = "") => {
-  return useLiveQuery(
-    () =>
-      projectsDB.projects
-        .filter(project => project.name.toLowerCase().includes(search.toLowerCase()))
-        .count(),
-    [search],
-    0
-  );
+  return useLiveQuery(() => projectsDB.projects.filter(project => project.name.toLowerCase().includes(search.toLowerCase())).count(), [search], 0);
 };
 export const useProject = (id: number): [boolean, Project?] => {
   const [project, setProject] = useState<Project | undefined>();

@@ -1,21 +1,14 @@
 "use client";
 
 import { useDeleteProject, useProjects, useProjectsCount } from "@/hooks/use-projects";
-import React, { useEffect, useState } from "react";
-import { Project } from "@/data/projects-db";
+import React, { useState } from "react";
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { CalendarIcon, DotsHorizontalIcon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { FilmIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { MotionCard } from "@/components/motion-card";
@@ -34,6 +27,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
+import { Project } from "@/interfaces/project";
 
 interface Props {
   search: string;
@@ -63,24 +57,14 @@ const VideosList = ({ page, search: defaultSearch }: Props) => {
         }}
         className="flex items-center justify-start"
       >
-        <Input
-          placeholder="Search videos"
-          className="w-full lg:w-1/2 mr-2"
-          name="Search"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
+        <Input placeholder="Search videos" className="w-full lg:w-1/2 mr-2" name="Search" value={search} onChange={e => setSearch(e.target.value)} />
         <Button size={"icon"} type="submit">
           <MagnifyingGlassIcon className="w-4 h-4" />
         </Button>
       </form>
       <TooltipProvider>
         <div className="grid auto-rows-min p-2 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 w-full h-full">
-          <AnimatePresence>
-            {projects?.map((project, index) => (
-              <ProjectCard index={index} project={project} key={project.id} />
-            ))}
-          </AnimatePresence>
+          <AnimatePresence>{projects?.map((project, index) => <ProjectCard index={index} project={project} key={project.id} />)}</AnimatePresence>
         </div>
       </TooltipProvider>
 
@@ -101,11 +85,7 @@ const VideosList = ({ page, search: defaultSearch }: Props) => {
               if (pageNumber > totalPages) return null;
               return (
                 <PaginationItem key={i}>
-                  <PaginationLink
-                    href={`/?search=${search.trim()}&page=${pageNumber}`}
-                    shallow
-                    isActive={pageNumber == page}
-                  >
+                  <PaginationLink href={`/?search=${search.trim()}&page=${pageNumber}`} shallow isActive={pageNumber == page}>
                     {pageNumber}
                   </PaginationLink>
                 </PaginationItem>
@@ -136,21 +116,6 @@ const ProjectCard = ({ project, index }: { project: Project; index: number }) =>
   const deleteProject = useDeleteProject();
 
   const [isDeleting, setIsDeleting] = React.useState(false);
-
-  const [currentImage, setCurrentImage] = useState(0);
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      if (currentImage === project.videos.length - 1) {
-        setCurrentImage(0);
-        return;
-      }
-      setCurrentImage(currentImage + 1);
-
-    }, 1000 * 5);
-
-    return () => clearInterval(intervalId);
-  }, [currentImage, project.videos.length]);
 
   return (
     <MotionCard
@@ -202,7 +167,7 @@ const ProjectCard = ({ project, index }: { project: Project; index: number }) =>
                   initial={{
                     opacity: 0
                   }}
-                  src={project.videos[currentImage].thumbnail}
+                  src={project.thumbnail}
                   alt="Project thumbnail"
                   width={1280}
                   height={720}
@@ -228,9 +193,7 @@ const ProjectCard = ({ project, index }: { project: Project; index: number }) =>
           <div className="flex flex-row items-center justify-between">
             <Tooltip>
               <TooltipTrigger asChild>
-                <CardTitle className="whitespace-nowrap overflow-clip text-ellipsis h-full">
-                  {project.name}
-                </CardTitle>
+                <CardTitle className="whitespace-nowrap overflow-clip text-ellipsis h-full">{project.name}</CardTitle>
               </TooltipTrigger>
               <TooltipContent side="bottom" align="start" className="max-w-[250px] h-auto">
                 <p
@@ -287,8 +250,7 @@ const ProjectCard = ({ project, index }: { project: Project; index: number }) =>
             </TooltipTrigger>
             <TooltipContent>
               <div>
-                Created: {project.createdAt.toLocaleDateString()} -{" "}
-                {project.createdAt.toLocaleTimeString()}
+                Created: {project.createdAt.toLocaleDateString()} - {project.createdAt.toLocaleTimeString()}
               </div>
             </TooltipContent>
           </Tooltip>
@@ -303,8 +265,7 @@ const ProjectCard = ({ project, index }: { project: Project; index: number }) =>
               </TooltipTrigger>
               <TooltipContent>
                 <div>
-                  Updated at: {project.updatedAt.toLocaleDateString()} -{" "}
-                  {project.updatedAt.toLocaleTimeString()}
+                  Updated at: {project.updatedAt.toLocaleDateString()} - {project.updatedAt.toLocaleTimeString()}
                 </div>
               </TooltipContent>
             </Tooltip>
