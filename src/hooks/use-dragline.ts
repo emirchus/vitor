@@ -5,10 +5,9 @@ import { useState } from "react";
 export function useDragLine() {
   const [dragLineData, setDragLineData] = useState<DragLineData>({ isMoving: false, movePositions: [], assistPositions: [] });
 
-  /** 获取辅助线 */
   const defaultGetAssistPosition = (data: {
     editorData: TimelineRow[];
-    assistActionIds?: number[];
+    assistActionIds?: string[];
     action: TimelineAction;
     row: TimelineRow;
     startLeft: number;
@@ -43,7 +42,6 @@ export function useDragLine() {
     return positions;
   };
 
-  /** 获取当前移动标记 */
   const defaultGetMovePosition = (data: {
     start: number;
     end: number;
@@ -58,7 +56,6 @@ export function useDragLine() {
     return dir === "right" ? [left + width] : [left];
   };
 
-  /** 初始化draglines */
   const initDragLine = (data: { movePositions?: number[]; assistPositions?: number[] }) => {
     const { movePositions, assistPositions } = data;
 
@@ -69,7 +66,6 @@ export function useDragLine() {
     });
   };
 
-  /** 更新dragline */
   const updateDragLine = (data: { movePositions?: number[]; assistPositions?: number[] }) => {
     const { movePositions, assistPositions } = data;
     setDragLineData(pre => ({
@@ -79,7 +75,6 @@ export function useDragLine() {
     }));
   };
 
-  /** 释放draglines */
   const disposeDragLine = () => {
     setDragLineData({ isMoving: false, movePositions: [], assistPositions: [] });
   };
