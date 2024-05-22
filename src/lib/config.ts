@@ -1,7 +1,7 @@
 export const siteConfig = {
   name: "Vitor",
   url: process.env.VERCEL_URL || "https://vitor.app",
-  ogImage: "/og.png",
+  ogImage: `${process.env.VERCEL_URL}/og.png`,
   description: "Vitor beautifully Vitor is and accessible and beautiful video editor made with NextJs. Accessible. Customizable. Open Source.",
   links: {
     twitter: "https://twitter.com/emirchus",
