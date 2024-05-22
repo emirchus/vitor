@@ -5,8 +5,6 @@ export interface VideosUploadStore {
   setVideos: (videos: File[]) => void;
   addVideo: (video: File) => void;
   removeVideo: (index: number) => void;
-  thumbnails: Record<string, string>;
-  setThumbnails: (thumbnails: Record<string, string>) => void;
   modal: boolean;
   setModal: (modal: boolean) => void;
 }
@@ -18,6 +16,4 @@ export const useVideosUploadStore = create<VideosUploadStore>(set => ({
   removeVideo: index => set(state => ({ videos: state.videos.filter((_, i) => i !== index) })),
   modal: false,
   setModal: modal => set({ modal }),
-  thumbnails: {},
-  setThumbnails: thumbnails => set({ thumbnails }),
 }));

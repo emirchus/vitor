@@ -1,7 +1,12 @@
-import { Space_Grotesk as FontSans } from 'next/font/google';
+export const siteConfig = {
+  name: "Vitor",
+  url: process.env.VERCEL_URL || "https://vitor.app",
+  ogImage: `${process.env.VERCEL_URL}/og.png`,
+  description: "Vitor beautifully Vitor is and accessible and beautiful video editor made with NextJs. Accessible. Customizable. Open Source.",
+  links: {
+    twitter: "https://twitter.com/emirchus",
+    github: "https://github.com/emirchus/vitor"
+  }
+};
 
-export const fontSans = FontSans({
-  weight: ['400', '500', '700'],
-  subsets: ['latin'],
-  variable: '--font-sans'
-});
+export type SiteConfig = typeof siteConfig;

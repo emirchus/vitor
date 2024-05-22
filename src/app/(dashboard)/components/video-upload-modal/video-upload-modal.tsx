@@ -3,14 +3,7 @@
 import { Loading } from "@/components/loading";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollAreaWithMask } from "@/components/ui/scroll-area";
 import { usePreview } from "@/hooks/use-image-preview";
 import { formatBytes } from "@/lib/utils";
@@ -24,7 +17,7 @@ import { useRouter } from "next/navigation";
 let thumbnailCache: Record<string, string> = {};
 
 export const VideoUploadModal = () => {
-  const { addVideo, modal, setModal, removeVideo, videos, setThumbnails } = useVideosUploadStore();
+  const { addVideo, modal, setModal, removeVideo, videos } = useVideosUploadStore();
 
   const router = useRouter();
 
@@ -53,9 +46,8 @@ export const VideoUploadModal = () => {
         <DialogHeader>
           <DialogTitle>Upload videos</DialogTitle>
           <DialogDescription>
-            There are {videos.length} (
-            {formatBytes(videos.reduce((prev, curr) => prev + curr.size, 0))}) videos in the queue.
-            You can upload multiple videos at once.
+            There are {videos.length} ({formatBytes(videos.reduce((prev, curr) => prev + curr.size, 0))}) videos in the queue. You can upload multiple
+            videos at once.
           </DialogDescription>
         </DialogHeader>
         <ScrollAreaWithMask className="max-h-[60vh]">
@@ -79,9 +71,7 @@ export const VideoUploadModal = () => {
                       input.onchange = event => {
                         const files = (event.target as HTMLInputElement).files;
                         if (files) {
-                          const newFiles = Array.from(files).filter(file =>
-                            file.type.includes("video")
-                          );
+                          const newFiles = Array.from(files).filter(file => file.type.includes("video"));
                           newFiles.forEach(file => addVideo(file));
                         }
                       };
@@ -111,8 +101,6 @@ export const VideoUploadModal = () => {
           <Button
             onClick={() => {
               setModal(false);
-              //TODO: Create Project structure
-              setThumbnails(thumbnailCache);
               router.push("/editor");
             }}
             disabled={videos.length === 0}
@@ -137,30 +125,14 @@ const VideoCard = ({ video, index }: { video: File; index: number }) => {
 
   return (
     <Card className="relative">
-      <Button
-        onClick={() => removeVideo(index)}
-        className="absolute -right-2 -top-2"
-        size={"icon"}
-        variant={"outline"}
-      >
+      <Button onClick={() => removeVideo(index)} className="absolute -right-2 -top-2" size={"icon"} variant={"outline"}>
         <span className="sr-only">Remove video</span>
         <Cross1Icon />
       </Button>
       <CardHeader>
-        <AspectRatio
-          ratio={16 / 9}
-          className="w-full h-full flex items-center justify-center rounded-sm overflow-hidden mb-2 bg-muted/40"
-        >
+        <AspectRatio ratio={16 / 9} className="w-full h-full flex items-center justify-center rounded-sm overflow-hidden mb-2 bg-muted/40">
           {isLoaded ? (
-            imageUrl && (
-              <Image
-                src={imageUrl}
-                alt={video.name}
-                width={1280}
-                height={720}
-                className="object-cover w-full h-auto"
-              />
-            )
+            imageUrl && <Image src={imageUrl} alt={video.name} width={1280} height={720} className="object-cover w-full h-auto" />
           ) : (
             <Loading />
           )}
