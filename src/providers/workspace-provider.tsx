@@ -84,8 +84,8 @@ export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) =
   }, [_project, loadProject, loading, router]);
 
   const commitProject = useCallback(
-    (newProject?: Project) => {
-      projectsDB.projects.put(newProject || project!);
+    async (newProject?: Project) => {
+      await projectsDB.projects.put(newProject || {...project!, updatedAt: new Date()});
     },
     [project]
   );
@@ -93,11 +93,22 @@ export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) =
   const saveProject = useCallback(
     async (saveForce: boolean = false, newProject?: Project) => {
       if (!project) return;
-      if (newProject) setProject(newProject);
+      if (newProject)
+        setProject({
+          ...newProject,
+          updatedAt: new Date()
+        });
       logger.log("Saving project...");
 
       if (saveForce) {
-        commitProject();
+        await commitProject(newProject);
+
+        if (!newProject) {
+          setProject({
+            ...project,
+            updatedAt: new Date()
+          });
+        }
       }
 
       logger.log("Project saved...");

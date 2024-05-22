@@ -130,49 +130,54 @@ export const TimeAction = ({
   };
 
   return (
-    <RowDnd
-      ref={rowRnd}
-      parentRef={areaRef}
-      start={startLeft}
-      left={transform.left}
-      width={transform.width}
-      grid={1}
-      adsorptionDistance={Math.max(gridSize / 2, 8)}
-      adsorptionPositions={dragLineData.assistPositions}
-      deltaScrollLeft={deltaScrollLeft}
-      bounds={{
-        left: 20,
-        right: rightLimit
-      }}
-      edges={{
-        left: `.action-left-stretch`,
-        right: `.action-right-stretch`
-      }}
-      enableDragging
-      enableResizing
-      onDragStart={handleDragStart}
-      onDrag={handleDrag}
-      onDragEnd={handleDragEnd}
-      onResizeStart={handleResizeStart}
-      onResize={handleResizing}
-      onResizeEnd={handleResizeEnd}
-    >
-      <div
-        onMouseDown={() => {
-          isDragWhenClick.current = false;
+    <>
+      <RowDnd
+        ref={rowRnd}
+        parentRef={areaRef}
+        start={startLeft}
+        left={transform.left}
+        width={transform.width}
+        grid={1}
+        adsorptionDistance={Math.max(gridSize / 2, 8)}
+        adsorptionPositions={dragLineData.assistPositions}
+        deltaScrollLeft={deltaScrollLeft}
+        bounds={{
+          left: 20,
+          right: rightLimit
         }}
-        className={
-          "action absolute left-0 top-1/2 -translate-y-1/2 bg-green-600/20 border-green-600 border rounded z-[1] h-[40px] box-border bg-repeat-x  "
-        }
-        style={{
-          backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="50" height="40" fill-opacity="0.4"><image width="40" height="40" xlink:href="${action.thumbnail}" /></svg>')`,
-          backgroundSize: "contain",
-          backgroundPosition: "center"
+        edges={{
+          left: `.action-left-stretch`,
+          right: `.action-right-stretch`
         }}
+        enableDragging
+        enableResizing
+        onDragStart={handleDragStart}
+        onDrag={handleDrag}
+        onDragEnd={handleDragEnd}
+        onResizeStart={handleResizeStart}
+        onResize={handleResizing}
+        onResizeEnd={handleResizeEnd}
       >
-        <div className="action-left-stretch z-[2] cursor-e-resize absolute top-1/2 w-1 left-0 -translate-x-1/2 -translate-y-1/2 h-[70%] bg-green-600 border border-green-600 rounded-md" />
-        <div className="action-right-stretch z-[2] cursor-e-resize absolute top-1/2 w-1 right-0 translate-x-1/2 -translate-y-1/2 h-[70%] bg-green-600 border border-green-600 rounded-md" />
-      </div>
-    </RowDnd>
+        <div
+          id={`action-${action.id}`}
+          onMouseDown={() => {
+            isDragWhenClick.current = false;
+          }}
+          className={
+            "action absolute left-0 top-1/2 -translate-y-1/2 bg-green-600/20 border-green-600 border rounded z-[1] h-[40px] box-border bg-repeat-x  "
+          }
+          style={{
+            backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="50" height="30" fill-opacity="0.4"><image width="30" height="30" xlink:href="${action.thumbnail}" /></svg>')`,
+            backgroundPosition: "left top"
+          }}
+        >
+          <div className="action-left-stretch z-[2] cursor-e-resize absolute top-1/2 w-1 left-0 -translate-x-1/2 -translate-y-1/2 h-[70%] bg-green-600 border border-green-600 rounded-md" />
+          <div className="action-right-stretch z-[2] cursor-e-resize absolute top-1/2 w-1 right-0 translate-x-1/2 -translate-y-1/2 h-[70%] bg-green-600 border border-green-600 rounded-md" />
+          <p className="w-full absolute left-2 bottom-0 text-xs text-secondary-foreground cursor-default">
+            {action.file?.name}
+          </p>
+        </div>
+      </RowDnd>
+    </>
   );
 };

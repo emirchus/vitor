@@ -32,7 +32,7 @@ export const Toolbox = () => {
 
   return (
     <div className="w-full h-full grid grid-rows-3 grid-cols-1">
-      <div className="grid grid-cols-3 grid-rows-1 bg-muted/20 p-2 row-end-1">
+      <div className="grid grid-cols-3 grid-rows-1 bg-background p-2 row-end-1">
         <div className="flex flex-row items-center justify-start space-x-2">
           <Button variant="ghost" size="icon">
             <CursorArrowIcon className=" h-4 w-4" />

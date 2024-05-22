@@ -19,12 +19,13 @@ import { useWorkspace } from "@/providers/workspace-provider";
 import { useEditorStore } from "@/store/editor.store";
 import { fetchFile } from "@ffmpeg/util";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { ArrowLeftIcon, Share2Icon } from "@radix-ui/react-icons";
+import { ArrowLeftIcon, ClockIcon, Share2Icon } from "@radix-ui/react-icons";
 import { Progress } from "@/components/ui/progress";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 import { Loading } from "@/components/loading";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const Header = () => {
   const router = useRouter();
@@ -232,6 +233,18 @@ const Header = () => {
         </div>
         <div className="col-span-1 flex flex-row items-center justify-center w-full text-center max-w-md overflow-clip">
           {project && <h3 className="text-ellipsis text-nowrap ">{project.name}</h3>}
+          {project?.updatedAt && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center rounded-md border p-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2s ml-2">
+                    <ClockIcon className="w-4 h-4" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>Last updated at {project?.updatedAt!.toLocaleString()}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
         </div>
         <div className=" col-span-1 flex flex-row items-center justify-end overflow-hidden">
           <ModeToggle />
